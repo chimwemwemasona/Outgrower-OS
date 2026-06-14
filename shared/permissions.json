@@ -1,0 +1,74 @@
+{
+  "roles": {
+    "admin": {
+      "label": "System Administrator",
+      "permissions": [
+        "users.manage",
+        "reference.manage",
+        "dashboard.view",
+        "farmers.write",
+        "fields.write",
+        "crop_cycles.write",
+        "inputs.write",
+        "visits.write",
+        "deliveries.write",
+        "quality.write",
+        "payments.write",
+        "statements.generate",
+        "exports.full",
+        "audit.view"
+      ]
+    },
+    "production_manager": {
+      "label": "Production Manager",
+      "permissions": [
+        "dashboard.view",
+        "farmers.write",
+        "fields.write",
+        "crop_cycles.write",
+        "inputs.write",
+        "visits.write",
+        "statements.generate",
+        "exports.production"
+      ]
+    },
+    "field_officer": {
+      "label": "Field Officer / Agronomist",
+      "permissions": [
+        "dashboard.limited",
+        "farmers.write",
+        "fields.write",
+        "crop_cycles.planting_confirm",
+        "inputs.write",
+        "visits.write",
+        "offline_drafts.sync"
+      ]
+    },
+    "collection_quality": {
+      "label": "Collection / Quality Officer",
+      "permissions": [
+        "dashboard.limited",
+        "deliveries.write",
+        "quality.write",
+        "exports.collection"
+      ]
+    },
+    "finance": {
+      "label": "Finance Officer",
+      "permissions": [
+        "dashboard.limited",
+        "payments.write",
+        "statements.generate",
+        "exports.finance"
+      ]
+    },
+    "viewer": {
+      "label": "Buyer / Management Viewer",
+      "permissions": [
+        "dashboard.view",
+        "exports.approved_summary"
+      ]
+    }
+  }
+}
+

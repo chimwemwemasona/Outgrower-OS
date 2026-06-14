@@ -1,0 +1,19 @@
+{
+  "name": "outgrower-os",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Outgrower OS Zambia prototype workspace",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm --workspace frontend run dev",
+    "build": "npm --workspace frontend run build",
+    "preview": "npm --workspace frontend run preview",
+    "typecheck": "npm --workspace frontend run typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+
