@@ -24,7 +24,8 @@ textarea {
 }
 
 button,
-select {
+select,
+input {
   min-height: 42px;
 }
 
@@ -50,6 +51,14 @@ select {
   background: #ffffff;
   color: #172018;
   padding: 8px 10px;
+}
+
+input {
+  border: 1px solid #cbd5ce;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172018;
+  padding: 9px 10px;
 }
 
 .app-shell {
@@ -271,10 +280,149 @@ th {
   text-transform: uppercase;
 }
 
+.signed-out-panel,
+.production-workspace {
+  border: 1px solid #d8ddd3;
+  border-radius: 8px;
+  background: #fffdf8;
+  margin-top: 16px;
+  padding: 22px;
+}
+
+.workspace-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.workspace-head p,
+.signed-out-panel p {
+  margin: 8px 0 0;
+}
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.metric,
+.form-panel {
+  border: 1px solid #e1e5dd;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.metric {
+  padding: 12px;
+}
+
+.metric strong {
+  display: block;
+  color: #244734;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.metric span,
+.field-control {
+  color: #56645a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.notice-line {
+  border-left: 3px solid #2f6f4e;
+  margin: 0 0 16px;
+  padding-left: 10px;
+}
+
+.tab-row,
+.form-actions,
+.draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tab-row {
+  margin-bottom: 16px;
+}
+
+.tab-row button,
+.secondary-button {
+  background: #eef2ec;
+  color: #244734;
+}
+
+.tab-row .active-tab {
+  background: #244734;
+  color: #ffffff;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-panel {
+  padding: 16px;
+}
+
+.form-panel h3 {
+  margin: 0 0 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.field-control {
+  display: grid;
+  gap: 5px;
+}
+
+.field-control input,
+.field-control select {
+  color: #172018;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.form-actions,
+.draft-actions {
+  margin-top: 14px;
+}
+
+.record-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.record-list li {
+  border: 1px solid #e1e5dd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
 @media (max-width: 860px) {
   .summary-grid,
   .content-band,
-  .two-column {
+  .two-column,
+  .workflow-grid,
+  .metric-strip,
+  .form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -284,6 +432,7 @@ th {
   }
 
   .auth-panel,
+  .workspace-head,
   .api-banner,
   .auth-actions {
     align-items: stretch;

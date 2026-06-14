@@ -86,7 +86,7 @@ Future sessions must teach as they implement. A phase is not complete until both
 | --- | --- | --- | --- | --- |
 | 1. Discovery and UX | Done | Product / UX / Engineering | 2026-06-14 | SRS baseline has been converted into approved prototype defaults, workflow, role, data, UX, backlog, and acceptance artifacts. |
 | 2. Foundation | Done | Engineering | 2026-06-14 | React/Vite frontend, Gin backend, database schema/seeds, demo auth, role permissions, reference-data foundation, setup commands, and verification evidence are complete. |
-| 3. Production Modules | Not Started | Engineering / Operations | 2026-06-14 | Farmer, field, crop cycle, inputs, visits, photos, and offline drafts pending. |
+| 3. Production Modules | In Progress | Engineering / Operations | 2026-06-14 | Farmer, field, crop cycle, input issue, field visit, and offline draft workflow slices are implemented with API/UI evidence; photo upload and durable persistence remain. |
 | 4. Procurement Modules | Not Started | Engineering / Finance / Collection | 2026-06-14 | Forecasts, collections, quality, deductions, payments, and statements pending. |
 | 5. Reporting and Hardening | Not Started | Engineering / Product | 2026-06-14 | Dashboard, exports, audit, backups, performance, and security pending. |
 | 6. UAT and Pilot Launch | Not Started | Product / Operations | 2026-06-14 | Training, setup data, acceptance evidence, and production launch pending. |
@@ -108,6 +108,8 @@ Use these commands from the repository root unless noted otherwise.
 | Run backend checks | `$env:GOCACHE='.cache/go-build'; & 'C:\Program Files\Go\bin\go.exe' test ./...` from `backend/` | Use the workspace-local Go build cache in restricted environments. |
 | Run backend API | `$env:GOCACHE='C:\Users\justp\Documents\Outgrower OS\.cache\go-build'; $env:OUTGROWER_HTTP_ADDR=':18080'; & 'C:\Program Files\Go\bin\go.exe' run .\cmd\api` from `backend/` | Starts the Gin API on port 18080 to avoid common local Apache/IIS/dev-server collisions on 8080. |
 | Backend health check | `Invoke-WebRequest -Uri 'http://127.0.0.1:18080/api/v1/health' -UseBasicParsing` | Confirms the Gin API is responding. |
+
+If the frontend is opened at `http://127.0.0.1:5173`, the browser will call `http://127.0.0.1:18080/api/v1` by default. If it is opened at `http://localhost:5173`, the browser will call `http://localhost:18080/api/v1` by default. Restart the backend after CORS or environment changes so the running API uses the latest allowlist behavior.
 
 ## Prototype Phase Plan
 
@@ -573,6 +575,8 @@ Append new entries at the top of this table.
 
 | Date | Phase | Completed work | Decisions made | Tests / evidence | Risks / blockers | Next step |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-14 | Phase 3. Production Modules | Fixed local browser CORS behavior for `127.0.0.1:5173` and made the frontend default API URL follow the browser hostname. | Local development should work whether the operator opens Vite through `localhost` or `127.0.0.1`. | `go test ./...`, `npm run typecheck`, `npm run build`, and temporary API CORS probe for `Origin: http://127.0.0.1:5173` passed. | The currently running backend process must be restarted to pick up this code change. | Restart the API and retry sign-in from the browser. |
+| 2026-06-14 | Phase 3. Production Modules | Added Gin API endpoints and frontend workspace for farmers, fields, crop cycles, input issues, field visits, and offline draft sync. | Use an in-memory production store for Phase 3 workflow validation while keeping PostgreSQL schema ready for durable persistence. | `npm run typecheck`, `npm run build`, `npm audit`, `go test ./...`, and Phase 3 API smoke test passed: farmer -> field -> ABE Chilli crop cycle -> input -> visit -> offline draft sync. | True photo upload/compression and persistence-backed offline sync are not complete yet. | Add durable database-backed production records, file upload handling, and stronger offline conflict behavior before marking Phase 3 Done. |
 | 2026-06-14 | Phase 2. Foundation | Wired the frontend to the Gin backend for health, reference data, and demo sign-in. | Frontend should use backend APIs as the source of truth for foundation data, with local seed data only as a fallback if the API is unavailable. | `npm run typecheck`, `npm run build`, `npm audit`, `go test ./...`, and API CORS smoke tests passed. | Reference-data activation toggles are still local UI state until persistence-backed configuration is implemented. | Phase 3 can build production modules on a live frontend/backend contract. |
 | 2026-06-14 | Phase 2. Foundation | Changed the backend default/documented API port from 8080 to 18080 after local 8080 requests were served by Apache. | Use port 18080 for the prototype Gin API unless the operator explicitly overrides `OUTGROWER_HTTP_ADDR`. | Local probe showed `127.0.0.1:8080` returned `Server: Apache`; backend docs and env defaults now use 18080. | None. | Use `http://127.0.0.1:18080/api/v1/...` for API checks. |
 | 2026-06-14 | Phase 2. Foundation | Migrated the backend API from standard-library routing to Gin and completed Phase 2 acceptance. | Gin is the Go framework of choice for the backend API. | `go test ./...` passed; Gin API smoke test passed for `/api/v1/health`, `/api/v1/reference-data` with ABE Chilli, and `/api/v1/auth/login`; `npm run typecheck`, `npm run build`, and `npm audit` passed. | Workspace-local `GOCACHE` is still needed in this restricted environment. | Begin Phase 3 Production Modules: farmer, field, crop cycle, inputs, visits, photos, and offline drafts. |
@@ -591,6 +595,9 @@ Append new entries at the top of this table.
 
 | Date | Category | Decision | Rationale | Impact |
 | --- | --- | --- | --- | --- |
+| 2026-06-14 | Architecture | Treat loopback Vite origins as allowed local development origins and derive the frontend fallback API host from the browser host. | Browser sessions may use either `localhost` or `127.0.0.1`; mixing them causes avoidable CORS friction during local testing. | `frontend/src/api/client.ts` now follows the browser hostname by default, and backend CORS explicitly accepts both loopback Vite origins. |
+| 2026-06-14 | Architecture | Validate Phase 3 production workflows with a Gin in-memory store before database persistence. | This proves workflow shape, API contracts, frontend behavior, validation, and edge cases quickly before wiring PostgreSQL access. | Phase 3 endpoints are usable now, but final completion requires persistence-backed records. |
+| 2026-06-14 | UX | Add a signed-in production workspace for Phase 3 field workflows. | Field officers need one place to register farmers, map fields, confirm planting, record inputs, record visits, and manage offline drafts. | The frontend now exposes Phase 3 only after backend sign-in. |
 | 2026-06-14 | Architecture | Wire the Phase 2 frontend to the Gin backend APIs. | The foundation should prove browser-to-API flow before Phase 3 adds real production workflows. | `App.tsx` now calls health, reference-data, and login endpoints through `frontend/src/api/client.ts`. |
 | 2026-06-14 | Architecture | Allow both `localhost:5173` and `127.0.0.1:5173` as local frontend origins. | Local development may use either hostname, and CORS must not block valid browser API calls. | Backend CORS now uses `OUTGROWER_ALLOWED_ORIGINS` with a comma-separated local allowlist. |
 | 2026-06-14 | Architecture | Use port 18080 as the default local Gin API port. | Port 8080 is already served by Apache in the local environment, causing API health checks to hit the wrong process. | `.env.example`, backend default address, README commands, and local checks use `http://127.0.0.1:18080`. |
@@ -625,6 +632,8 @@ Append new entries at the top of this table.
 | Risk | Sensitive personal data is exposed. | Apply role controls, HTTPS, secure hosting, and minimal data collection. |
 | Risk | Prototype code becomes the commercial system without hardening. | Complete architecture, security, legal, and product reviews before commercial expansion. |
 | Resolved constraint | Go was not installed in the original local environment. | Go 1.26.4 is now installed at `C:\Program Files\Go\bin\go.exe`, machine PATH includes `C:\Program Files\Go\bin`, and backend tests pass when `GOCACHE` points to `.cache/go-build`. |
+| Risk | Phase 3 in-memory records reset when the backend restarts. | Use this for workflow validation only; wire PostgreSQL persistence before pilot or UAT data entry. |
+| Risk | Photo evidence is represented by a file-name placeholder, not real upload/storage yet. | Add browser upload, validation, compression, and attachment storage before Phase 3 is marked Done. |
 
 ## Open Questions
 
@@ -640,6 +649,14 @@ Use this table to link implementation evidence to phase gates and SRS requiremen
 
 | Date | Phase | Requirement / gate | Evidence | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| 2026-06-14 | Phase 3. Production Modules | Browser-to-API CORS compatibility for Phase 3 workspace. | Temporary Gin API on port 18381 with health request using `Origin: http://127.0.0.1:5173` | Passed | Response included `Access-Control-Allow-Origin: http://127.0.0.1:5173`; frontend fallback API host now follows `window.location.hostname`. |
+| 2026-06-14 | Phase 3. Production Modules | Farmer registry API/UI slice. | `POST /api/v1/farmers`; `ProductionWorkspace` farmer registration form | Passed for workflow validation | Duplicate farmer code is blocked; duplicate phone returns a warning. |
+| 2026-06-14 | Phase 3. Production Modules | Field registration API/UI slice. | `POST /api/v1/fields`; field form with acreage and GPS coordinates | Passed for workflow validation | Field must reference a known farmer and blocks duplicate field code. |
+| 2026-06-14 | Phase 3. Production Modules | Crop-cycle planting API/UI slice. | `POST /api/v1/crop-cycles`; planting confirmation form | Passed for workflow validation | Blocks a second active crop cycle on the same field. |
+| 2026-06-14 | Phase 3. Production Modules | Input distribution API/UI slice. | `POST /api/v1/input-issues`; input issue form | Passed for workflow validation | Requires item plus farmer or crop-cycle reference; tracks recoverable value. |
+| 2026-06-14 | Phase 3. Production Modules | Field visit API/UI slice. | `POST /api/v1/field-visits`; visit form with risk and photo-name evidence | Passed for workflow validation | Real photo upload/storage is still pending. |
+| 2026-06-14 | Phase 3. Production Modules | Offline draft queue. | LocalStorage-backed draft queue; `POST /api/v1/offline-drafts/sync` | Passed for workflow validation | Sync endpoint accepts drafts, but does not yet persist each draft into its target module automatically. |
+| 2026-06-14 | Phase 3. Production Modules | End-to-end production smoke test. | Temporary Gin API on port 18380 | Passed | Created `FARM-010`, `FIELD-010`, ABE Chilli crop cycle, seed tray input, medium-risk field visit, and synced field-visit draft. |
 | 2026-06-14 | Phase 2. Foundation | Frontend consumes backend health endpoint. | `frontend/src/api/client.ts`, `frontend/src/App.tsx`, Gin `/api/v1/health` | Passed | UI displays API online/offline status and backend service version. |
 | 2026-06-14 | Phase 2. Foundation | Frontend consumes backend reference data. | `GET /api/v1/reference-data`; frontend crop/reference tables | Passed | API reference data includes ABE Chilli and is mapped from snake_case to frontend camelCase. |
 | 2026-06-14 | Phase 2. Foundation | Frontend sign-in calls backend auth endpoint. | `POST /api/v1/auth/login`; demo role selector | Passed | Demo login returns backend user payload and drives role-aware UI state. |

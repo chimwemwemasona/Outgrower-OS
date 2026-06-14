@@ -3,6 +3,7 @@ import { ClipboardCheck, Database, LogOut, ShieldCheck, Sprout } from "lucide-re
 import { hasPermission } from "./auth/permissions";
 import { fetchHealth, fetchReferenceData, login } from "./api/client";
 import { cropDefaults, gradeOptions, paymentMethods, roleLabels } from "./data/prototypeDefaults";
+import { ProductionWorkspace } from "./production/ProductionWorkspace";
 import type { AuthenticatedUser, CropReference, HealthResponse, RoleKey } from "./types";
 
 const foundationItems = [
@@ -248,6 +249,18 @@ export function App() {
           <p>{collectionPoints.length > 0 ? collectionPoints.join(", ") : "Collection points loading from API."}</p>
         </div>
       </section>
+
+      {activeUser ? (
+        <ProductionWorkspace user={activeUser} crops={crops} />
+      ) : (
+        <section className="signed-out-panel">
+          <h2>Sign in to access the production workspace</h2>
+          <p>
+            Phase 3 workflows are available after backend sign-in so the app can apply role-aware access and keep
+            production records tied to an operator.
+          </p>
+        </section>
+      )}
     </main>
   );
 }

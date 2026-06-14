@@ -88,6 +88,64 @@ CREATE TABLE crop_cycles (
     CHECK (status IN ('planned', 'planted', 'growing', 'harvest-ready', 'completed', 'failed', 'cancelled'))
 );
 
+CREATE TABLE input_issues (
+    id uuid PRIMARY KEY,
+    organisation_id uuid NOT NULL REFERENCES organisations(id),
+    farmer_id uuid REFERENCES farmers(id),
+    crop_cycle_id uuid REFERENCES crop_cycles(id),
+    item text NOT NULL,
+    quantity numeric(12, 2) NOT NULL CHECK (quantity >= 0),
+    unit text NOT NULL,
+    issue_date date NOT NULL,
+    issuer_user_id uuid REFERENCES users(id),
+    recoverable boolean NOT NULL DEFAULT false,
+    recoverable_value numeric(12, 2) NOT NULL DEFAULT 0 CHECK (recoverable_value >= 0),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (farmer_id IS NOT NULL OR crop_cycle_id IS NOT NULL)
+);
+
+CREATE TABLE field_visits (
+    id uuid PRIMARY KEY,
+    organisation_id uuid NOT NULL REFERENCES organisations(id),
+    field_id uuid NOT NULL REFERENCES fields(id),
+    crop_cycle_id uuid NOT NULL REFERENCES crop_cycles(id),
+    officer_user_id uuid REFERENCES users(id),
+    visit_date date NOT NULL,
+    crop_stage text NOT NULL,
+    condition text NOT NULL,
+    notes text NOT NULL DEFAULT '',
+    risk_category text,
+    risk_severity text,
+    recommendation text,
+    follow_up_date date,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (risk_severity IS NULL OR risk_severity IN ('low', 'medium', 'high'))
+);
+
+CREATE TABLE attachments (
+    id uuid PRIMARY KEY,
+    organisation_id uuid NOT NULL REFERENCES organisations(id),
+    entity_type text NOT NULL,
+    entity_id uuid NOT NULL,
+    file_name text NOT NULL,
+    content_type text NOT NULL,
+    storage_key text NOT NULL,
+    uploaded_by_user_id uuid REFERENCES users(id),
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE offline_drafts (
+    id uuid PRIMARY KEY,
+    organisation_id uuid NOT NULL REFERENCES organisations(id),
+    draft_type text NOT NULL,
+    payload jsonb NOT NULL,
+    status text NOT NULL DEFAULT 'pending',
+    created_by_user_id uuid REFERENCES users(id),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    synced_at timestamptz,
+    CHECK (status IN ('pending', 'synced', 'failed'))
+);
+
 CREATE TABLE audit_events (
     id uuid PRIMARY KEY,
     organisation_id uuid NOT NULL REFERENCES organisations(id),
@@ -99,4 +157,3 @@ CREATE TABLE audit_events (
     before_data jsonb,
     after_data jsonb
 );
-
